@@ -32,13 +32,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Flux<EmployeeEvent> getEmployeeEvents(String id) {
-        employeeRepository.findById(id)
+        return employeeRepository.findById(id)
                 .flatMapMany(employee -> {
                     Flux<Long> interval = Flux.interval(Duration.ofSeconds(2));
                     Flux<EmployeeEvent> employeeEventFlux = Flux.fromStream(Stream.generate(() -> new EmployeeEvent(employee, new Date())));
                     return Flux.zip(interval, employeeEventFlux)
                         .map(Tuple2::getT2);
                 });
-        return null;
     }
 }

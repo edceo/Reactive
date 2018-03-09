@@ -18,4 +18,10 @@ public class Employee {
     private String id;
     private String name;
     private Long salary;
+
+    //public Employee(String id, String name, long salary) {
+    //    this.id = id;
+    //    this.name = name;
+    //    this.salary = salary;
+    //}
 }

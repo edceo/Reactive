@@ -5,6 +5,7 @@ import com.nevalabs.reactive.model.EmployeeEvent;
 import com.nevalabs.reactive.repository.EmployeeRepository;
 import com.nevalabs.reactive.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ *
+ */
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -29,8 +33,8 @@ public class EmployeeController {
         return employeeService.getEmployeeById(id);
     }
 
-    @GetMapping("/{id}/events")
+    @GetMapping(value = "/{id}/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<EmployeeEvent> getEvents(@PathVariable("id") final String id) {
-        return null;
+        return employeeService.getEmployeeEvents(id);
     }
 }
