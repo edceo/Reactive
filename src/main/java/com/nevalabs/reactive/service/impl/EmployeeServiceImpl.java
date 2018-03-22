@@ -4,6 +4,7 @@ import com.nevalabs.reactive.model.Employee;
 import com.nevalabs.reactive.model.EmployeeEvent;
 import com.nevalabs.reactive.repository.EmployeeRepository;
 import com.nevalabs.reactive.service.EmployeeService;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,6 +21,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    private static Publisher<? extends EmployeeEvent> apply(Employee employee) {
+        Flux<Long> interval = Flux.interval(Duration.ofSeconds(2));
+        Flux<EmployeeEvent> employeeEventFlux =
+                Flux.fromStream(
+                        Stream.generate(() -> new EmployeeEvent(employee, new Date())));
+
+        return Flux.zip(interval, employeeEventFlux)
+                .map(Tuple2::getT2);
+    }
+
     @Override
     public Flux<Employee> getAllEmployees() {
         return employeeRepository.findAll();
@@ -33,11 +44,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Flux<EmployeeEvent> getEmployeeEvents(String id) {
         return employeeRepository.findById(id)
-                .flatMapMany(employee -> {
-                    Flux<Long> interval = Flux.interval(Duration.ofSeconds(2));
-                    Flux<EmployeeEvent> employeeEventFlux = Flux.fromStream(Stream.generate(() -> new EmployeeEvent(employee, new Date())));
-                    return Flux.zip(interval, employeeEventFlux)
-                        .map(Tuple2::getT2);
-                });
+                .flatMapMany(EmployeeServiceImpl::apply);
     }
 }
